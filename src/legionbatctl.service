@@ -1,0 +1,11 @@
+[Unit]
+Description=Battery Charge Control Service
+After=multi-user.target
+ConditionACPower=yes
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/legionbatctl-auto
+
+[Install]
+WantedBy=multi-user.target

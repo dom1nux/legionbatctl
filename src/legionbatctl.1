@@ -1,0 +1,111 @@
+.TH LEGIONBATCTL 1 "March 2025" "legionbatctl 1.0" "User Commands"
+.SH NAME
+legionbatctl \- control battery charging behavior on Lenovo Legion laptops
+.SH SYNOPSIS
+.B legionbatctl
+.I {status|toggle|enable|disable|set-threshold <percentage>}
+.SH DESCRIPTION
+.B legionbatctl
+is a utility for controlling the battery charging behavior on Lenovo Legion laptops.
+It allows users to set a maximum battery charge threshold, which can help extend
+battery lifespan by preventing the battery from charging to 100% capacity.
+.PP
+The tool works by controlling the conservation mode feature available on Lenovo Legion laptops.
+When conservation mode is enabled, the laptop will stop charging the battery once it reaches
+the configured threshold, even when connected to AC power.
+.SH COMMANDS
+.TP
+.B status
+Display the current battery management status, including whether conservation mode is enabled
+and the configured charge threshold.
+.TP
+.B toggle
+Toggle between threshold-limited charging and full (100%) charging.
+.TP
+.B enable
+Enable battery management to limit charging to the configured threshold.
+.TP
+.B disable
+Disable battery management to allow charging to 100%.
+.TP
+.B set-threshold <percentage>
+Set the battery charge threshold to the specified percentage. The value must be between 60 and 100.
+.SH OPTIONS
+.TP
+No additional options are available.
+.SH FILES
+.TP
+.I /etc/legionbatctl.conf
+Configuration file containing battery management settings.
+.TP
+.I /sys/bus/platform/drivers/ideapad_acpi/VPC2004:00/conservation_mode
+System file controlling the conservation mode feature.
+.SH EXAMPLES
+.TP
+Check current battery management status:
+.B sudo legionbatctl status
+.TP
+Set charge threshold to 80%:
+.B sudo legionbatctl set-threshold 80
+.TP
+Enable battery management:
+.B sudo legionbatctl enable
+.TP
+Disable battery management:
+.B sudo legionbatctl disable
+.SH AUTOMATED MODE
+The package also includes an automated mode that runs as a systemd service.
+When enabled, it automatically manages the conservation mode based on the
+current battery level and configured threshold.
+.PP
+The automated mode can be controlled using systemd commands:
+.TP
+Check status:
+.B sudo systemctl status legionbatctl.timer
+.TP
+Temporarily stop:
+.B sudo systemctl stop legionbatctl.timer
+.TP
+Restart:
+.B sudo systemctl start legionbatctl.timer
+.TP
+Disable permanently:
+.B sudo systemctl disable legionbatctl.timer
+.SH CONFIGURATION
+The configuration file at /etc/legionbatctl.conf contains the following settings:
+.TP
+.B CONSERVATION_ENABLED
+Set to 1 to enable battery management, 0 to disable.
+.TP
+.B CHARGE_THRESHOLD
+The maximum battery charge percentage (60-100).
+.PP
+These settings can be modified directly by editing the file or by using the
+legionbatctl commands.
+.SH TROUBLESHOOTING
+.TP
+.B "Conservation mode control file not found"
+This error occurs if your laptop model uses a different path for the conservation mode control.
+You may need to modify the CONS_MODE variable in the scripts to match your system.
+.PP
+To find the correct path, try:
+.B find /sys -name conservation_mode
+.TP
+.B "Battery still charges to 100%"
+1. Check if the automated mode is running:
+.B sudo systemctl status legionbatctl.timer
+.PP
+2. Verify that conservation mode is working:
+.B cat /sys/bus/platform/drivers/ideapad_acpi/VPC2004:00/conservation_mode
+.PP
+This should return 1 when enabled.
+.PP
+3. Check your configuration:
+.B cat /etc/legionbatctl.conf
+.PP
+Ensure CONSERVATION_ENABLED=1 and CHARGE_THRESHOLD is set to your desired value.
+.SH AUTHOR
+dom1nux go.francko.dr@gmail.com
+.SH SEE ALSO
+.BR systemctl (1),
+.BR systemd.timer (5)
