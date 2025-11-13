@@ -11,14 +11,16 @@ import (
 func NewSetThresholdCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "set-threshold <percentage>",
-		Short: "Set battery charge threshold (20-100)",
+		Short: "Set battery charge threshold (60-100)",
 		Long: `Set the maximum battery charge threshold. When battery management is enabled,
 the system will stop charging once the battery reaches this percentage by
 enabling conservation mode.
 
-For optimal battery health, thresholds between 70-85% are recommended.
-Your hardware's native conservation mode limit is 60%, but this utility
-allows you to effectively achieve higher limits.`,
+NOTE: Due to hardware limitations on Lenovo Legion Slim 7 (2021), the threshold
+must be between 60-100%. The native conservation mode is fixed at 60%, but this
+utility allows you to effectively achieve higher charge limits.
+
+For optimal battery health, thresholds between 75-85% are recommended.`,
 		Args: cobra.ExactArgs(1),
 		RunE: runSetThreshold,
 	}
@@ -32,8 +34,8 @@ func runSetThreshold(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("invalid threshold value: %s", args[0])
 	}
 
-	if threshold < 20 || threshold > 100 {
-		return fmt.Errorf("threshold must be between 20 and 100")
+	if threshold < 60 || threshold > 100 {
+		return fmt.Errorf("threshold must be between 60 and 100 due to hardware conservation mode limitation")
 	}
 
 	// TODO: Implement actual threshold setting logic
