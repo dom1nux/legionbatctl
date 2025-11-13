@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"net"
+	"os"
+	"strings"
 	"time"
 
 	"github.com/dom1nux/legionbatctl/internal/protocol"
@@ -232,20 +234,74 @@ func (d *Daemon) handleDaemonStatus(params map[string]interface{}) (interface{},
 
 // readBatteryInfo reads current battery information
 func (d *Daemon) readBatteryInfo() (int, bool, bool, error) {
-	// TODO: Implement actual battery reading
-	// For now, return placeholder values
-	return 75, false, true, nil
+	// Read battery capacity
+	capacity, err := os.ReadFile("/sys/class/power_supply/BAT0/capacity")
+	if err != nil {
+		return 0, false, false, fmt.Errorf("failed to read battery capacity: %w", err)
+	}
+
+	var batteryLevel int
+	_, err = fmt.Sscanf(string(capacity), "%d", &batteryLevel)
+	if err != nil {
+		return 0, false, false, fmt.Errorf("failed to parse battery capacity: %w", err)
+	}
+
+	// Read conservation mode status
+	conservationData, err := os.ReadFile("/sys/bus/platform/drivers/ideapad_acpi/VPC2004:00/conservation_mode")
+	if err != nil {
+		return batteryLevel, false, false, fmt.Errorf("failed to read conservation mode: %w", err)
+	}
+
+	var conservationMode int
+	_, err = fmt.Sscanf(string(conservationData), "%d", &conservationMode)
+	if err != nil {
+		return batteryLevel, false, false, fmt.Errorf("failed to parse conservation mode: %w", err)
+	}
+
+	// Read charging status
+	statusData, err := os.ReadFile("/sys/class/power_supply/BAT0/status")
+	if err != nil {
+		return batteryLevel, conservationMode == 1, false, fmt.Errorf("failed to read battery status: %w", err)
+	}
+
+	status := strings.TrimSpace(string(statusData))
+	charging := status == "Charging"
+
+	return batteryLevel, conservationMode == 1, charging, nil
 }
 
 // setConservationMode sets the hardware conservation mode
 func (d *Daemon) setConservationMode(enable bool) error {
-	// TODO: Implement actual conservation mode setting
-	// For now, just log the action
+	conservationPath := "/sys/bus/platform/drivers/ideapad_acpi/VPC2004:00/conservation_mode"
+
+	var value string
 	if enable {
-		fmt.Printf("Enabling conservation mode\n")
+		value = "1"
+		fmt.Printf("Enabling conservation mode (writing 1 to %s)\n", conservationPath)
 	} else {
-		fmt.Printf("Disabling conservation mode\n")
+		value = "0"
+		fmt.Printf("Disabling conservation mode (writing 0 to %s)\n", conservationPath)
 	}
+
+	// Write to conservation mode file
+	err := os.WriteFile(conservationPath, []byte(value), 0644)
+	if err != nil {
+		return fmt.Errorf("failed to write conservation mode: %w", err)
+	}
+
+	// Verify the change was applied
+	data, err := os.ReadFile(conservationPath)
+	if err != nil {
+		return fmt.Errorf("failed to verify conservation mode change: %w", err)
+	}
+
+	actualValue := strings.TrimSpace(string(data))
+	expectedValue := strings.TrimSpace(value)
+
+	if actualValue != expectedValue {
+		return fmt.Errorf("conservation mode not updated: expected %s, got %s", expectedValue, actualValue)
+	}
+
 	return nil
 }
 

@@ -1,11 +1,13 @@
 # LegionBatCTL Go Version Makefile
+# Supports daemon architecture with systemd service
 
 # Variables
 BINARY_NAME := legionbatctl
 BUILD_DIR := build
 VERSION := $(shell git describe --tags --always --dirty 2>/dev/null || echo "dev")
 COMMIT := $(shell git rev-parse --short HEAD 2>/dev/null || echo "unknown")
-LDFLAGS := -ldflags "-X github.com/dom1nux/legionbatctl/pkg/version.Version=$(VERSION) -X github.com/dom1nux/legionbatctl/pkg/version.Commit=$(COMMIT)"
+BUILD_DATE := $(shell date -u +%Y-%m-%dT%H:%M:%S)
+LDFLAGS := -ldflags "-X main.version=$(VERSION) -X main.buildDate=$(BUILD_DATE) -s -w"
 
 # Default target
 .PHONY: all
@@ -18,38 +20,95 @@ build:
 	@mkdir -p $(BUILD_DIR)
 	go build $(LDFLAGS) -o $(BUILD_DIR)/$(BINARY_NAME) ./cmd/legionbatctl
 
+# Quick build in current directory (for development)
+.PHONY: build-local
+build-local:
+	@echo "Building LegionBatCTL $(VERSION) locally..."
+	go build $(LDFLAGS) -o $(BINARY_NAME) ./cmd/legionbatctl
+
 # Install binary and system files
 .PHONY: install
 install: build
 	@echo "Installing LegionBatCTL..."
 	install -Dm755 $(BUILD_DIR)/$(BINARY_NAME) /usr/bin/$(BINARY_NAME)
 	install -Dm644 systemd/legionbatctl.service /etc/systemd/system/legionbatctl.service
-	install -Dm644 systemd/legionbatctl.timer /etc/systemd/system/legionbatctl.timer
-	install -Dm644 man/legionbatctl.1 /usr/share/man/man1/legionbatctl.1
-	install -Dm644 docs/legionbatctl.conf /etc/legionbatctl.conf
 	systemctl daemon-reload
-	@echo "Installation complete. Use 'sudo systemctl enable --now legionbatctl.timer' to enable auto mode."
+	@echo "Installation complete. Use 'sudo systemctl enable --now legionbatctl.service' to enable daemon mode."
+
+# Install and start service
+.PHONY: install-start
+install-start: install
+	@echo "Installing and starting LegionBatCTL daemon..."
+	systemctl enable --now legionbatctl.service
+	@echo "Daemon started. Use 'legionbatctl status' to check status."
 
 # Uninstall
 .PHONY: uninstall
 uninstall:
 	@echo "Uninstalling LegionBatCTL..."
-	systemctl stop legionbatctl.timer 2>/dev/null || true
-	systemctl disable legionbatctl.timer 2>/dev/null || true
+	systemctl stop legionbatctl.service 2>/dev/null || true
+	systemctl disable legionbatctl.service 2>/dev/null || true
 	rm -f /usr/bin/$(BINARY_NAME)
 	rm -f /etc/systemd/system/legionbatctl.service
-	rm -f /etc/systemd/system/legionbatctl.timer
-	rm -f /usr/share/man/man1/legionbatctl.1
-	rm -f /etc/legionbatctl.conf
+	rm -f /var/run/$(BINARY_NAME).sock
+	rm -f /var/run/$(BINARY_NAME).pid
+	rm -f /etc/$(BINARY_NAME).state
+	rm -f /etc/$(BINARY_NAME).state.backup
+	rm -f /etc/$(BINARY_NAME).state.tmp
 	systemctl daemon-reload
 	@echo "Uninstallation complete."
+
+# Reinstall (uninstall + install)
+.PHONY: reinstall
+reinstall: uninstall install
 
 # Clean build artifacts
 .PHONY: clean
 clean:
 	@echo "Cleaning build artifacts..."
 	rm -rf $(BUILD_DIR)
+	rm -f $(BINARY_NAME)
 	go clean
+
+# Service management targets
+.PHONY: status start stop restart enable disable logs
+status:
+	@echo "=== LegionBatCTL Service Status ==="
+	systemctl status legionbatctl.service || true
+	@echo ""
+	@echo "=== CLI Status ==="
+	@if command -v $(BINARY_NAME) >/dev/null 2>&1; then \
+		$(BINARY_NAME) status; \
+	else \
+		echo "Binary not found. Use 'sudo make install' first."; \
+	fi
+
+start:
+	@echo "Starting LegionBatCTL daemon..."
+	systemctl start legionbatctl.service
+	@echo "Use 'make status' to check if it started successfully."
+
+stop:
+	@echo "Stopping LegionBatCTL daemon..."
+	systemctl stop legionbatctl.service
+
+restart:
+	@echo "Restarting LegionBatCTL daemon..."
+	systemctl restart legionbatctl.service
+	@echo "Use 'make status' to check if it restarted successfully."
+
+enable:
+	@echo "Enabling LegionBatCTL daemon (auto-start on boot)..."
+	systemctl enable legionbatctl.service
+	@echo "Service will start automatically on boot."
+
+disable:
+	@echo "Disabling LegionBatCTL daemon..."
+	systemctl disable legionbatctl.service
+
+logs:
+	@echo "=== LegionBatCTL Service Logs ==="
+	journalctl -u legionbatctl.service -f
 
 # Run tests
 .PHONY: test
@@ -97,15 +156,44 @@ build-all:
 	# Linux ARM64
 	GOOS=linux GOARCH=arm64 go build $(LDFLAGS) -o $(BUILD_DIR)/$(BINARY_NAME)-linux-arm64 ./cmd/legionbatctl
 
-# Development mode - build and run immediately
-.PHONY: dev
-dev: build
-	sudo $(BUILD_DIR)/$(BINARY_NAME) status
+# Development targets
+.PHONY: dev dev-daemon
+dev: build-local
+	@echo "Testing CLI locally..."
+	@if [ -f $(BINARY_NAME) ]; then \
+		$(BINARY_NAME) status; \
+	else \
+		echo "Binary not found. Run 'make build-local' first."; \
+	fi
 
-# Auto mode development
-.PHONY: dev-auto
-dev-auto: build
-	sudo $(BUILD_DIR)/$(BINARY_NAME) auto
+dev-daemon: build-local
+	@echo "Testing daemon locally (foreground)..."
+	@if [ -f $(BINARY_NAME) ]; then \
+		echo "Starting daemon in foreground (Ctrl+C to stop)..."; \
+		$(BINARY_NAME) daemon; \
+	else \
+		echo "Binary not found. Run 'make build-local' first."; \
+	fi
+
+# Test CLI commands after daemon is installed
+.PHONY: test-cli
+test-cli:
+	@echo "Testing CLI commands..."
+	@if command -v $(BINARY_NAME) >/dev/null 2>&1; then \
+		echo "=== Status Command ==="; \
+		$(BINARY_NAME) status; \
+		echo; \
+		echo "=== Set Threshold Command ==="; \
+		$(BINARY_NAME) set-threshold 80; \
+		echo; \
+		echo "=== Enable Command ==="; \
+		$(BINARY_NAME) enable; \
+		echo; \
+		echo "=== Final Status ==="; \
+		$(BINARY_NAME) status; \
+	else \
+		echo "Binary not found. Use 'sudo make install' first."; \
+	fi
 
 # Generate dependencies
 .PHONY: deps
@@ -114,40 +202,81 @@ deps:
 	go mod download
 	go mod tidy
 
-# Create initial config file
-.PHONY: config
-config:
-	@echo "Creating default configuration..."
-	install -Dm644 /dev/null /etc/legionbatctl.conf
-	echo "CONSERVATION_ENABLED=1" >> /etc/legionbatctl.conf
-	echo "CHARGE_THRESHOLD=80" >> /etc/legionbatctl.conf
-	@echo "Configuration created at /etc/legionbatctl.conf"
+# Create initial state file (for testing)
+.PHONY: init-state
+init-state:
+	@echo "Creating initial state file..."
+	sudo install -Dm644 /dev/null /etc/$(BINARY_NAME).state
+	@echo "State file created at /etc/$(BINARY_NAME).state"
 
-# Test auto mode manually
-.PHONY: test-auto
-test-auto: build
-	@echo "Testing auto mode (requires root)..."
-	sudo $(BUILD_DIR)/$(BINARY_NAME) auto --dry-run
+# Quick installation and test
+.PHONY: quick-install
+quick-install: build-local install-start test-cli
+	@echo "Quick installation and testing complete!"
+
+# Test daemon functionality
+.PHONY: test-daemon
+test-daemon:
+	@echo "=== Testing Daemon Functionality ==="
+	@if systemctl is-active --quiet legionbatctl.service; then \
+		echo "✅ Daemon is running"; \
+		$(BINARY_NAME) status; \
+	else \
+		echo "❌ Daemon is not running. Use 'sudo make start' first."; \
+	fi
 
 # Help
 .PHONY: help
 help:
-	@echo "LegionBatCTL Go Version - Available targets:"
+	@echo "LegionBatCTL Go Version - Daemon Architecture"
 	@echo ""
-	@echo "  build          - Build binary"
-	@echo "  install        - Build and install to system"
-	@echo "  uninstall      - Remove from system"
-	@echo "  clean          - Clean build artifacts"
-	@echo "  test           - Run tests"
-	@echo "  test-coverage  - Run tests with coverage report"
-	@echo "  fmt            - Format code"
-	@echo "  lint           - Run linter"
-	@echo "  security       - Run security check"
-	@echo "  check          - Run all checks (fmt, lint, test, security)"
-	@echo "  build-all      - Build for multiple architectures"
-	@echo "  dev            - Build and run status command"
-	@echo "  dev-auto       - Build and run auto command"
-	@echo "  deps           - Download and tidy dependencies"
-	@echo "  config         - Create default configuration file"
-	@echo "  test-auto      - Test auto mode in dry-run"
-	@echo "  help           - Show this help message"
+	@echo "BUILD TARGETS:"
+	@echo "  build           - Build binary to build/ directory"
+	@echo "  build-local     - Build binary to current directory"
+	@echo "  clean           - Clean build artifacts"
+	@echo ""
+	@echo "$(YELLOW)INSTALLATION:$(NC)"
+	@echo "  install         - Install binary and systemd service (requires root)"
+	@echo "  install-start   - Install and start daemon (requires root)"
+	@echo "  uninstall       - Remove from system (requires root)"
+	@echo "  reinstall       - Uninstall and install (requires root)"
+	@echo ""
+	@echo "$(YELLOW)SERVICE MANAGEMENT:$(NC)"
+	@echo "  start           - Start daemon (requires root)"
+	@echo "  stop            - Stop daemon (requires root)"
+	@echo "  restart         - Restart daemon (requires root)"
+	@echo "  enable          - Enable auto-start on boot (requires root)"
+	@echo "  disable         - Disable auto-start (requires root)"
+	@echo "  status          - Show service and CLI status"
+	@echo "  logs            - Show live service logs"
+	@echo ""
+	@echo "$(YELLOW)DEVELOPMENT:$(NC)"
+	@echo "  dev             - Build and test CLI locally"
+	@echo "  dev-daemon      - Build and run daemon in foreground"
+	@echo "  test-cli        - Test all CLI commands"
+	@echo "  test-daemon     - Test daemon functionality"
+	@echo "  quick-install   - Build, install, start and test (requires root)"
+	@echo ""
+	@echo "$(YELLOW)TESTING:$(NC)"
+	@echo "  test            - Run tests"
+	@echo "  test-coverage   - Run tests with coverage report"
+	@echo ""
+	@echo "$(YELLOW)CODE QUALITY:$(NC)"
+	@echo "  fmt             - Format code"
+	@echo "  lint            - Run linter"
+	@echo "  security        - Run security check"
+	@echo "  check           - Run all checks (fmt, lint, test, security)"
+	@echo "  deps            - Download and tidy dependencies"
+	@echo ""
+	@echo "$(YELLOW)MISCELLANEOUS:$(NC)"
+	@echo "  build-all       - Build for multiple architectures"
+	@echo "  init-state      - Create initial state file"
+	@echo "  help            - Show this help message"
+	@echo ""
+	@echo "$(YELLOW)EXAMPLES:$(NC)"
+	@echo "  make dev                    # Test CLI locally"
+	@echo "  sudo make install-start    # Install and start daemon"
+	@echo "  make status                 # Check service status"
+	@echo "  make logs                   # View live logs"
+	@echo "  sudo make restart           # Restart daemon"
+	@echo "  sudo make uninstall         # Remove everything"
