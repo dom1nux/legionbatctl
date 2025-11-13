@@ -1,0 +1,29 @@
+[Unit]
+Description=LegionBatCTL Battery Management Daemon
+Documentation=man:legionbatctl(8)
+After=network.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/legionbatctl daemon
+ExecReload=/bin/kill -HUP $MAINPID
+KillMode=process
+Restart=on-failure
+RestartSec=5s
+PIDFile=/var/run/legionbatctl.pid
+
+# Security settings
+User=root
+Group=root
+SupplementaryGroups=power
+
+# Resource limits
+LimitNOFILE=65536
+MemoryMax=64M
+
+# Environment
+Environment=GO_VERSION=1.22
+
+[Install]
+WantedBy=multi-user.target
