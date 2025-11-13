@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
+	"github.com/dom1nux/legionbatctl/internal/client"
 )
 
 // NewEnableCommand creates the enable command
@@ -21,7 +22,22 @@ charging the battery once it reaches the configured threshold.`,
 }
 
 func runEnable(cmd *cobra.Command, args []string) error {
-	// TODO: Implement actual enable logic
-	fmt.Println("Battery management enabled (will maintain 80% limit)")
+	// Create client with default socket path
+	c := client.NewClient("")
+
+	// Create command executor
+	executor := client.NewCommandExecutor(c)
+
+	// Execute enable command
+	result := executor.ExecuteEnable()
+
+	// Format and output result
+	output := client.FormatEnableResult(result)
+	fmt.Print(output)
+
+	if !result.Success {
+		return fmt.Errorf(result.Error)
+	}
+
 	return nil
 }

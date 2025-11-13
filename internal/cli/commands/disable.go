@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
+	"github.com/dom1nux/legionbatctl/internal/client"
 )
 
 // NewDisableCommand creates the disable command
@@ -21,7 +22,22 @@ charging behavior.`,
 }
 
 func runDisable(cmd *cobra.Command, args []string) error {
-	// TODO: Implement actual disable logic
-	fmt.Println("Battery management disabled (will charge to 100%)")
+	// Create client with default socket path
+	c := client.NewClient("")
+
+	// Create command executor
+	executor := client.NewCommandExecutor(c)
+
+	// Execute disable command
+	result := executor.ExecuteDisable()
+
+	// Format and output result
+	output := client.FormatDisableResult(result)
+	fmt.Print(output)
+
+	if !result.Success {
+		return fmt.Errorf(result.Error)
+	}
+
 	return nil
 }

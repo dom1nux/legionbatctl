@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
+	"github.com/dom1nux/legionbatctl/internal/client"
 )
 
 // NewStatusCommand creates the status command
@@ -21,14 +22,22 @@ status and the software battery management configuration.`,
 }
 
 func runStatus(cmd *cobra.Command, args []string) error {
-	// TODO: Implement actual status checking
-	// For now, just show a placeholder
-	fmt.Println("Battery Status:")
-	fmt.Println("  Hardware conservation mode: disabled")
-	fmt.Println("  Battery management: enabled")
-	fmt.Println("  Charge threshold: 80%")
-	fmt.Println("  Current battery level: 75%")
-	fmt.Println("  Charging status: Charging")
+	// Create client with default socket path
+	c := client.NewClient("")
+
+	// Create command executor
+	executor := client.NewCommandExecutor(c)
+
+	// Execute status command
+	result := executor.ExecuteStatus()
+
+	// Format and output result
+	output := client.FormatStatusResult(result)
+	fmt.Print(output)
+
+	if !result.Success {
+		return fmt.Errorf(result.Error)
+	}
 
 	return nil
 }

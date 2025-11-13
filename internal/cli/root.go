@@ -29,7 +29,6 @@ allowing you to effectively achieve higher charge limits (e.g., 80%).`,
 	rootCmd.AddCommand(commands.NewEnableCommand())
 	rootCmd.AddCommand(commands.NewDisableCommand())
 	rootCmd.AddCommand(commands.NewSetThresholdCommand())
-	rootCmd.AddCommand(commands.NewAutoCommand()) // For manual testing
 
 	// Set completion
 	rootCmd.CompletionOptions.DisableDefaultCmd = true

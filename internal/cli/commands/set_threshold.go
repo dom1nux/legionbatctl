@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/spf13/cobra"
+	"github.com/dom1nux/legionbatctl/internal/client"
 )
 
 // NewSetThresholdCommand creates the set-threshold command
@@ -34,11 +35,22 @@ func runSetThreshold(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("invalid threshold value: %s", args[0])
 	}
 
-	if threshold < 60 || threshold > 100 {
-		return fmt.Errorf("threshold must be between 60 and 100 due to hardware conservation mode limitation")
+	// Create client with default socket path
+	c := client.NewClient("")
+
+	// Create command executor
+	executor := client.NewCommandExecutor(c)
+
+	// Execute set threshold command
+	result := executor.ExecuteSetThreshold(threshold)
+
+	// Format and output result
+	output := client.FormatSetThresholdResult(result)
+	fmt.Print(output)
+
+	if !result.Success {
+		return fmt.Errorf(result.Error)
 	}
 
-	// TODO: Implement actual threshold setting logic
-	fmt.Printf("Charge threshold set to %d%%\n", threshold)
 	return nil
 }
