@@ -4,6 +4,8 @@
 *.dll
 *.so
 *.dylib
+legionbatctl
+legionbatctl-*
 
 # Build artifacts
 build/
