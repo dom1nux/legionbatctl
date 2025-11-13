@@ -42,6 +42,8 @@ func (d *Daemon) checkBatteryAndAdjust() {
 
 	// Only process if we're on AC power and management is enabled
 	if !charging || !d.stateManager.GetConservationEnabled() {
+		fmt.Printf("Skipping check: AC connected=%v, conservation enabled=%v\n",
+			charging, d.stateManager.GetConservationEnabled())
 		return
 	}
 
