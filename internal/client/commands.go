@@ -28,6 +28,33 @@ func NewCommandExecutor(client *Client) *CommandExecutor {
 	}
 }
 
+// Helper functions for creating command results
+func newSuccessResult(message string, duration time.Duration) *CommandResult {
+	return &CommandResult{
+		Success:  true,
+		Message:  message,
+		Duration: duration,
+	}
+}
+
+func newSuccessResultWithData(message string, data interface{}, duration time.Duration) *CommandResult {
+	return &CommandResult{
+		Success:  true,
+		Message:  message,
+		Data:     data,
+		Duration: duration,
+	}
+}
+
+func newFailureResult(message string, err error, duration time.Duration) *CommandResult {
+	return &CommandResult{
+		Success:  false,
+		Message:  message,
+		Error:    err.Error(),
+		Duration: duration,
+	}
+}
+
 // ExecuteEnable executes the enable command
 func (e *CommandExecutor) ExecuteEnable() *CommandResult {
 	start := time.Now()
@@ -35,19 +62,10 @@ func (e *CommandExecutor) ExecuteEnable() *CommandResult {
 	duration := time.Since(start)
 
 	if err != nil {
-		return &CommandResult{
-			Success:  false,
-			Message:  "Failed to enable battery management",
-			Error:    err.Error(),
-			Duration: duration,
-		}
+		return newFailureResult("Failed to enable battery management", err, duration)
 	}
 
-	return &CommandResult{
-		Success:  true,
-		Message:  "Battery management enabled successfully",
-		Duration: duration,
-	}
+	return newSuccessResult("Battery management enabled successfully", duration)
 }
 
 // ExecuteDisable executes the disable command
@@ -57,19 +75,10 @@ func (e *CommandExecutor) ExecuteDisable() *CommandResult {
 	duration := time.Since(start)
 
 	if err != nil {
-		return &CommandResult{
-			Success:  false,
-			Message:  "Failed to disable battery management",
-			Error:    err.Error(),
-			Duration: duration,
-		}
+		return newFailureResult("Failed to disable battery management", err, duration)
 	}
 
-	return &CommandResult{
-		Success:  true,
-		Message:  "Battery management disabled successfully",
-		Duration: duration,
-	}
+	return newSuccessResult("Battery management disabled successfully", duration)
 }
 
 // ExecuteSetThreshold executes the set_threshold command
@@ -79,20 +88,14 @@ func (e *CommandExecutor) ExecuteSetThreshold(threshold int) *CommandResult {
 	duration := time.Since(start)
 
 	if err != nil {
-		return &CommandResult{
-			Success:  false,
-			Message:  fmt.Sprintf("Failed to set threshold to %d", threshold),
-			Error:    err.Error(),
-			Duration: duration,
-		}
+		return newFailureResult(fmt.Sprintf("Failed to set threshold to %d", threshold), err, duration)
 	}
 
-	return &CommandResult{
-		Success:  true,
-		Message:  fmt.Sprintf("Charge threshold set to %d%%", threshold),
-		Data:     map[string]interface{}{"threshold": threshold},
-		Duration: duration,
-	}
+	return newSuccessResultWithData(
+		fmt.Sprintf("Charge threshold set to %d%%", threshold),
+		map[string]interface{}{"threshold": threshold},
+		duration,
+	)
 }
 
 // ExecuteStatus executes the status command
@@ -102,20 +105,10 @@ func (e *CommandExecutor) ExecuteStatus() *CommandResult {
 	duration := time.Since(start)
 
 	if err != nil {
-		return &CommandResult{
-			Success:  false,
-			Message:  "Failed to get system status",
-			Error:    err.Error(),
-			Duration: duration,
-		}
+		return newFailureResult("Failed to get system status", err, duration)
 	}
 
-	return &CommandResult{
-		Success:  true,
-		Message:  "System status retrieved successfully",
-		Data:     status,
-		Duration: duration,
-	}
+	return newSuccessResultWithData("System status retrieved successfully", status, duration)
 }
 
 // ExecuteDaemonStatus executes the daemon_status command
@@ -125,20 +118,10 @@ func (e *CommandExecutor) ExecuteDaemonStatus() *CommandResult {
 	duration := time.Since(start)
 
 	if err != nil {
-		return &CommandResult{
-			Success:  false,
-			Message:  "Failed to get daemon status",
-			Error:    err.Error(),
-			Duration: duration,
-		}
+		return newFailureResult("Failed to get daemon status", err, duration)
 	}
 
-	return &CommandResult{
-		Success:  true,
-		Message:  "Daemon status retrieved successfully",
-		Data:     status,
-		Duration: duration,
-	}
+	return newSuccessResultWithData("Daemon status retrieved successfully", status, duration)
 }
 
 // FormatStatus formats status data for human-readable output
@@ -230,10 +213,6 @@ func formatCharging(charging bool) string {
 	return "discharging"
 }
 
-// ValidateThreshold validates a threshold value
-func ValidateThreshold(threshold int) error {
-	return protocol.ValidateThreshold(threshold)
-}
 
 // GetThresholdRange returns information about valid threshold range
 func GetThresholdRange() (min, max int, description string) {

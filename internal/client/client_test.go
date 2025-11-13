@@ -206,7 +206,7 @@ func TestValidateThreshold(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(fmt.Sprintf("threshold_%d", tt.threshold), func(t *testing.T) {
-			err := ValidateThreshold(tt.threshold)
+			err := protocol.ValidateThreshold(tt.threshold)
 			if (err != nil) != tt.expectErr {
 				t.Errorf("ValidateThreshold(%d) error = %v, expectErr %v", tt.threshold, err, tt.expectErr)
 			}
