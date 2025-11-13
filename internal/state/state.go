@@ -178,13 +178,8 @@ func (m *Manager) GetUptime() time.Duration {
 	return time.Since(m.state.StartTime)
 }
 
-// Validate validates the current state
-func (m *Manager) Validate() error {
-	m.mutex.RLock()
-	defer m.mutex.RUnlock()
-
-	state := m.state
-
+// validateStateFields validates state field values (internal helper)
+func validateStateFields(state *State) error {
 	// Validate threshold
 	if state.ChargeThreshold < 60 || state.ChargeThreshold > 100 {
 		return ErrInvalidThreshold
@@ -195,11 +190,6 @@ func (m *Manager) Validate() error {
 		return ErrInvalidBatteryLevel
 	}
 
-	// Validate PID
-	if state.PID <= 0 {
-		return ErrInvalidPID
-	}
-
 	// Validate current mode
 	validModes := map[string]bool{
 		"enabled":  true,
@@ -208,6 +198,24 @@ func (m *Manager) Validate() error {
 	}
 	if !validModes[state.CurrentMode] {
 		return ErrInvalidMode
+	}
+
+	return nil
+}
+
+// Validate validates the current state
+func (m *Manager) Validate() error {
+	m.mutex.RLock()
+	defer m.mutex.RUnlock()
+
+	// Validate common state fields
+	if err := validateStateFields(m.state); err != nil {
+		return err
+	}
+
+	// Validate PID (only for full validation)
+	if m.state.PID <= 0 {
+		return ErrInvalidPID
 	}
 
 	return nil

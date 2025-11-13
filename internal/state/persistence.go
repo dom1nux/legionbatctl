@@ -108,24 +108,7 @@ func (m *Manager) saveStateAtomic() error {
 
 // validateState validates the current state (requires read lock)
 func (m *Manager) validateState() error {
-	if m.state.ChargeThreshold < 60 || m.state.ChargeThreshold > 100 {
-		return ErrInvalidThreshold
-	}
-
-	if m.state.BatteryLevel < 0 || m.state.BatteryLevel > 100 {
-		return ErrInvalidBatteryLevel
-	}
-
-	validModes := map[string]bool{
-		"enabled":  true,
-		"disabled": true,
-		"unknown":  true,
-	}
-	if !validModes[m.state.CurrentMode] {
-		return ErrInvalidMode
-	}
-
-	return nil
+	return validateStateFields(m.state)
 }
 
 // createDefaultState creates a default state
