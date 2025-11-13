@@ -5,17 +5,19 @@ import (
 	"os"
 	"strings"
 
-	"github.com/dom1nux/legionbatctl/internal/auto"
+	"github.com/dom1nux/legionbatctl/internal/daemon"
 	"github.com/dom1nux/legionbatctl/internal/cli"
 )
 
 func main() {
-	// Fast path for auto mode - check if first argument is "auto"
-	if len(os.Args) > 1 && os.Args[1] == "auto" {
-		// For auto mode, we want minimal overhead and simple error handling
-		if err := auto.Run(); err != nil {
-			// Log to stderr for systemd compatibility
-			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+	// Fast path for daemon mode - check if first argument is "daemon"
+	if len(os.Args) > 1 && os.Args[1] == "daemon" {
+		// Use default paths for systemd service
+		socketPath := "/var/run/legionbatctl.sock"
+		statePath := "/etc/legionbatctl.state"
+
+		if err := daemon.RunDaemon(socketPath, statePath); err != nil {
+			fmt.Fprintf(os.Stderr, "Daemon failed: %v\n", err)
 			os.Exit(1)
 		}
 		return
