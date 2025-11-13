@@ -3,6 +3,7 @@ package client
 import (
 	"fmt"
 	"net"
+	"os"
 	"time"
 
 	"github.com/dom1nux/legionbatctl/internal/protocol"
@@ -22,7 +23,11 @@ type Client struct {
 // NewClient creates a new client instance
 func NewClient(socketPath string) *Client {
 	if socketPath == "" {
-		socketPath = DefaultSocketPath
+		// Check environment variable first
+		socketPath = os.Getenv("SOCKET_PATH")
+		if socketPath == "" {
+			socketPath = DefaultSocketPath
+		}
 	}
 
 	return &Client{

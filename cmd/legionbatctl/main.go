@@ -12,9 +12,17 @@ import (
 func main() {
 	// Fast path for daemon mode - check if first argument is "daemon"
 	if len(os.Args) > 1 && os.Args[1] == "daemon" {
-		// Use default paths for systemd service
-		socketPath := "/var/run/legionbatctl.sock"
-		statePath := "/etc/legionbatctl.state"
+		// Support environment variables for testing
+		socketPath := os.Getenv("SOCKET_PATH")
+		statePath := os.Getenv("STATE_PATH")
+
+		// Use defaults if not set (for production)
+		if socketPath == "" {
+			socketPath = "/var/run/legionbatctl.sock"
+		}
+		if statePath == "" {
+			statePath = "/etc/legionbatctl.state"
+		}
 
 		if err := daemon.RunDaemon(socketPath, statePath); err != nil {
 			fmt.Fprintf(os.Stderr, "Daemon failed: %v\n", err)
