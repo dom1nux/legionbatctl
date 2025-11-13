@@ -20,7 +20,7 @@ func RunDaemon(socketPath, statePath string) error {
 		return fmt.Errorf("daemon is already running (socket: %s)", socketPath)
 	}
 
-	fmt.Printf("LegionBatCTL daemon starting...\n")
+	fmt.Printf("legionbatctl daemon starting...\n")
 	fmt.Printf("Socket: %s\n", daemon.GetSocketPath())
 	fmt.Printf("State: %s\n", daemon.GetStatePath())
 	fmt.Printf("PID: %d\n", daemon.GetPID())

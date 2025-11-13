@@ -42,7 +42,7 @@ func (v Info) String() string {
 
 // FullString returns a detailed version string
 func (v Info) FullString() string {
-	return fmt.Sprintf(`LegionBatCTL %s
+	return fmt.Sprintf(`legionbatctl %s
 Commit:    %s
 Built:     %s
 Go:        %s

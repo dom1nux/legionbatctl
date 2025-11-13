@@ -1,10 +1,10 @@
-# LegionBatCTL
+# legionbatctl
 
 A sophisticated battery management utility for Lenovo Legion laptops that extends battery lifespan through intelligent charge threshold control.
 
 ## Overview
 
-LegionBatCTL is a Go-based battery management solution designed specifically for Lenovo Legion laptops. It solves a critical hardware limitation where the native conservation mode is fixed at 60% charge, allowing users to achieve higher charge limits (e.g., 80%) through intelligent threshold management.
+legionbatctl is a Go-based battery management solution designed specifically for Lenovo Legion laptops. It solves a critical hardware limitation where the native conservation mode is fixed at 60% charge, allowing users to achieve higher charge limits (e.g., 80%) through intelligent threshold management.
 
 > **Note**: This project was originally developed as a bash-based solution and completely rewritten in Go to provide better performance, maintainability, and architectural flexibility.
 
@@ -32,7 +32,7 @@ This approach effectively "hacks" the 60% hardware limit by using conservation m
 
 ### Dual-Mode Design
 
-LegionBatCTL implements a sophisticated single-binary architecture that operates in two modes:
+legionbatctl implements a sophisticated single-binary architecture that operates in two modes:
 
 ```
 ┌─────────────────┐    Unix Socket    ┌─────────────────┐

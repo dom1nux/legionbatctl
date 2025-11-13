@@ -22,7 +22,7 @@ func TestNewClient(t *testing.T) {
 		t.Errorf("Expected default timeout %v, got %v", DefaultTimeout, client.GetTimeout())
 	}
 
-	if client.String() != fmt.Sprintf("LegionBatCTL Client{socket: %s, timeout: %v}", socketPath, DefaultTimeout) {
+	if client.String() != fmt.Sprintf("legionbatctl Client{socket: %s, timeout: %v}", socketPath, DefaultTimeout) {
 		t.Errorf("Unexpected string representation: %s", client.String())
 	}
 }
