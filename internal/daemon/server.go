@@ -258,16 +258,30 @@ func (d *Daemon) readBatteryInfo() (int, bool, bool, error) {
 		return batteryLevel, false, false, fmt.Errorf("failed to parse conservation mode: %w", err)
 	}
 
-	// Read charging status
-	statusData, err := os.ReadFile("/sys/class/power_supply/BAT0/status")
+	// Read AC adapter status instead of battery charging status
+	// This is more reliable when conservation mode is active
+	acData, err := os.ReadFile("/sys/class/power_supply/ADP1/online")
 	if err != nil {
-		return batteryLevel, conservationMode == 1, false, fmt.Errorf("failed to read battery status: %w", err)
+		// Fallback to battery status if AC adapter is not available
+		statusData, err := os.ReadFile("/sys/class/power_supply/BAT0/status")
+		if err != nil {
+			return batteryLevel, conservationMode == 1, false, fmt.Errorf("failed to read battery status: %w", err)
+		}
+		status := strings.TrimSpace(string(statusData))
+		charging := status == "Charging"
+		return batteryLevel, conservationMode == 1, charging, nil
 	}
 
-	status := strings.TrimSpace(string(statusData))
-	charging := status == "Charging"
+	var acOnline int
+	_, err = fmt.Sscanf(string(acData), "%d", &acOnline)
+	if err != nil {
+		return batteryLevel, conservationMode == 1, false, fmt.Errorf("failed to parse AC adapter status: %w", err)
+	}
 
-	return batteryLevel, conservationMode == 1, charging, nil
+	// AC adapter online (1) means we're connected to power
+	acConnected := acOnline == 1
+
+	return batteryLevel, conservationMode == 1, acConnected, nil
 }
 
 // setConservationMode sets the hardware conservation mode
