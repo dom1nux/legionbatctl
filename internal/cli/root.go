@@ -11,7 +11,7 @@ func Run() error {
 	rootCmd := &cobra.Command{
 		Use:   "legionbatctl",
 		Short: "Lenovo Legion Battery Control Utility",
-		Long: `LegionBatCTL is a utility for controlling battery charging behavior on Lenovo Legion laptops.
+		Long: `legionbatctl is a utility for controlling battery charging behavior on Lenovo Legion laptops.
 It helps extend battery lifespan by managing conservation mode to maintain battery levels
 within configured thresholds.
 

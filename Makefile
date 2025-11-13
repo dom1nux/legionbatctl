@@ -1,4 +1,4 @@
-# LegionBatCTL - Simplified Makefile for mise-based Go installation
+# legionbatctl - Simplified Makefile for mise-based Go installation
 
 # Variables
 BINARY_NAME := legionbatctl
@@ -14,7 +14,7 @@ all: build
 # Build binary (uses mise for Go)
 .PHONY: build
 build:
-	@echo "Building LegionBatCTL $(VERSION)..."
+	@echo "Building legionbatctl $(VERSION)..."
 	@mkdir -p $(BUILD_DIR)
 	go build $(LDFLAGS) -o $(BUILD_DIR)/$(BINARY_NAME) ./cmd/legionbatctl
 
@@ -22,7 +22,7 @@ build:
 # NOTE: Run 'make build' first to create the binary
 .PHONY: install
 install:
-	@echo "Installing LegionBatCTL..."
+	@echo "Installing legionbatctl..."
 	@if [ ! -f $(BUILD_DIR)/$(BINARY_NAME) ]; then \
 		echo "Binary not found. Run 'make build' first."; \
 		exit 1; \
@@ -36,7 +36,7 @@ install:
 # Uninstall (stop service, remove files)
 .PHONY: uninstall
 uninstall:
-	@echo "Uninstalling LegionBatCTL..."
+	@echo "Uninstalling legionbatctl..."
 	systemctl stop legionbatctl.service 2>/dev/null || true
 	systemctl disable legionbatctl.service 2>/dev/null || true
 	rm -f /usr/bin/$(BINARY_NAME)
@@ -59,7 +59,7 @@ clean:
 # Service management targets
 .PHONY: status restart logs
 status:
-	@echo "=== LegionBatCTL Service Status ==="
+	@echo "=== legionbatctl Service Status ==="
 	systemctl status legionbatctl.service || true
 	@echo ""
 	@echo "=== CLI Status ==="
@@ -70,12 +70,12 @@ status:
 	fi
 
 restart:
-	@echo "Restarting LegionBatCTL daemon..."
+	@echo "Restarting legionbatctl daemon..."
 	systemctl restart legionbatctl.service
 	@echo "Use 'make status' to check if it restarted successfully."
 
 logs:
-	@echo "=== LegionBatCTL Service Logs ==="
+	@echo "=== legionbatctl Service Logs ==="
 	journalctl -u legionbatctl.service -f
 
 # Development targets
@@ -91,7 +91,7 @@ dev: build
 # Help
 .PHONY: help
 help:
-	@echo "LegionBatCTL - Simplified Makefile for mise-based Go installation"
+	@echo "legionbatctl - Simplified Makefile for mise-based Go installation"
 	@echo ""
 	@echo "MAIN TARGETS:"
 	@echo "  build           - Build binary to build/ directory (uses mise Go)"

@@ -14,7 +14,7 @@ const (
 	DefaultTimeout     = 10 * time.Second
 )
 
-// Client represents a client for communicating with the LegionBatCTL daemon
+// Client represents a client for communicating with the legionbatctl daemon
 type Client struct {
 	socketPath string
 	timeout    time.Duration
@@ -288,5 +288,5 @@ func (c *Client) Close() error {
 
 // String returns a string representation of the client
 func (c *Client) String() string {
-	return fmt.Sprintf("LegionBatCTL Client{socket: %s, timeout: %v}", c.socketPath, c.timeout)
+	return fmt.Sprintf("legionbatctl Client{socket: %s, timeout: %v}", c.socketPath, c.timeout)
 }

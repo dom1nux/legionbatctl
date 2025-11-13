@@ -1,5 +1,5 @@
 [Unit]
-Description=LegionBatCTL Battery Management Daemon
+Description=legionbatctl Battery Management Daemon
 Documentation=man:legionbatctl(8)
 After=network.target
 Wants=network-online.target
