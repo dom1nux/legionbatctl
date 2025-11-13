@@ -93,11 +93,36 @@ LegionBatCTL implements a sophisticated single-binary architecture that operates
 
 - Lenovo Legion laptop with conservation mode support
 - Linux operating system
-- Go 1.22+ (for building from source)
+- Go 1.22+ (for building from source) - can be installed via mise
 - Root/sudo privileges
 - systemd (for daemon mode)
 
-### Building from Source
+### Quick Installation with Makefile
+
+The project includes a simplified Makefile that works with mise-based Go installations:
+
+```bash
+# Clone the repository
+git clone https://github.com/dom1nux/legionbatctl.git
+cd legionbatctl
+
+# Build binary (uses mise for Go)
+make build
+
+# Install and start daemon (requires root)
+sudo make install
+
+# Check status
+make status
+```
+
+The Makefile separates build and installation phases:
+- **Build**: Done as regular user using your mise Go installation
+- **Install**: Done as root without requiring Go to be installed system-wide
+
+### Manual Installation
+
+If you prefer manual installation:
 
 ```bash
 git clone https://github.com/dom1nux/legionbatctl.git
@@ -105,27 +130,21 @@ cd legionbatctl
 go build -o legionbatctl ./cmd/legionbatctl
 sudo cp legionbatctl /usr/bin/
 sudo chmod +x /usr/bin/legionbatctl
+sudo cp systemd/legionbatctl.service /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable legionbatctl.service
+sudo systemctl start legionbatctl.service
 ```
 
-### Systemd Service Setup
+### Verification
 
-1. **Install the service file:**
-   ```bash
-   sudo cp systemd/legionbatctl.service /etc/systemd/system/
-   sudo systemctl daemon-reload
-   ```
+```bash
+# Check daemon status
+sudo systemctl status legionbatctl.service
 
-2. **Enable and start the daemon:**
-   ```bash
-   sudo systemctl enable legionbatctl.service
-   sudo systemctl start legionbatctl.service
-   ```
-
-3. **Verify the daemon is running:**
-   ```bash
-   sudo systemctl status legionbatctl.service
-   legionbatctl status
-   ```
+# Check battery management status
+legionbatctl status
+```
 
 ## Usage
 
@@ -207,6 +226,37 @@ Comprehensive error handling throughout the system:
 - **Hardware interaction**: Validation and graceful degradation
 - **Daemon lifecycle**: Proper cleanup and resource management
 
+## Makefile Commands
+
+The simplified Makefile provides all essential operations:
+
+```bash
+# Build binary (as user, with mise)
+make build
+
+# Install and start service (as root)
+sudo make install
+
+# Check service and CLI status
+make status
+
+# View live daemon logs
+make logs
+
+# Restart daemon
+sudo make restart
+
+# Uninstall completely
+sudo make uninstall
+
+# Clean build artifacts
+make clean
+
+# Local testing
+make dev          # Build and test CLI locally
+make help         # Show all available commands
+```
+
 ## Configuration
 
 ### Default Configuration
@@ -224,6 +274,23 @@ Hardware constraints require threshold validation:
 - **Minimum**: 60% (hardware conservation mode limit)
 - **Maximum**: 100% (full charge)
 - **Recommended**: 75-85% for optimal battery health
+
+### Hardware Detection Improvements
+
+The daemon now uses AC adapter status for more reliable power detection:
+
+```bash
+# AC adapter detection
+cat /sys/class/power_supply/ADP1/online
+
+# Battery level
+cat /sys/class/power_supply/BAT0/capacity
+
+# Conservation mode status
+cat /sys/bus/platform/drivers/ideapad_acpi/VPC2004:00/conservation_mode
+```
+
+This fixes issues where conservation mode causes the battery to report "Not charging" despite being connected to power.
 
 ## Development
 
