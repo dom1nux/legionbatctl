@@ -114,7 +114,7 @@ func abs(x int) int {
 func (d *Daemon) GetMonitoringStatus() MonitoringStatus {
 	if d.stateManager == nil {
 		return MonitoringStatus{
-			Enabled: false,
+			Enabled:  false,
 			Interval: d.checkInterval,
 		}
 	}

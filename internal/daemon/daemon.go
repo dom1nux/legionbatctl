@@ -30,8 +30,8 @@ type Daemon struct {
 	listener     net.Listener
 
 	// Control
-	mutex sync.RWMutex
-	done  chan bool
+	mutex   sync.RWMutex
+	done    chan bool
 	running bool
 
 	// Configuration
@@ -49,11 +49,11 @@ func NewDaemon(socketPath, statePath string) *Daemon {
 	}
 
 	return &Daemon{
-		socketPath: socketPath,
-		statePath:  statePath,
-		pidPath:    filepath.Join(filepath.Dir(socketPath), "legionbatctl.pid"),
-		done:       make(chan bool),
-		running:    false,
+		socketPath:    socketPath,
+		statePath:     statePath,
+		pidPath:       filepath.Join(filepath.Dir(socketPath), "legionbatctl.pid"),
+		done:          make(chan bool),
+		running:       false,
 		checkInterval: 30 * time.Second, // Default check interval
 	}
 }

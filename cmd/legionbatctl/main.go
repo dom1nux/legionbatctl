@@ -5,8 +5,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/dom1nux/legionbatctl/internal/daemon"
 	"github.com/dom1nux/legionbatctl/internal/cli"
+	"github.com/dom1nux/legionbatctl/internal/daemon"
 )
 
 func main() {
@@ -35,7 +35,7 @@ func main() {
 	if err := cli.Run(); err != nil {
 		// Handle help/version flags specially
 		if strings.Contains(err.Error(), "help requested") ||
-		   strings.Contains(err.Error(), "version") {
+			strings.Contains(err.Error(), "version") {
 			return // These are not errors, just exit cleanly
 		}
 

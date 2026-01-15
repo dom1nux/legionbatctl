@@ -12,9 +12,9 @@ type State struct {
 	ChargeThreshold     int  `json:"charge_threshold"`
 
 	// Runtime State
-	CurrentMode       string    `json:"current_mode"`        // "enabled", "disabled", "unknown"
-	LastAction        string    `json:"last_action"`         // "enable", "disable", "set_threshold", "auto"
-	LastActionTime    time.Time `json:"last_action_time"`
+	CurrentMode    string    `json:"current_mode"` // "enabled", "disabled", "unknown"
+	LastAction     string    `json:"last_action"`  // "enable", "disable", "set_threshold", "auto"
+	LastActionTime time.Time `json:"last_action_time"`
 
 	// Battery Information
 	BatteryLevel     int  `json:"battery_level"`
@@ -22,7 +22,7 @@ type State struct {
 	Charging         bool `json:"charging"`
 
 	// Daemon Information
-	PID      int       `json:"pid"`
+	PID       int       `json:"pid"`
 	StartTime time.Time `json:"start_time"`
 }
 
@@ -152,8 +152,8 @@ func (m *Manager) ShouldEnableConservation() bool {
 
 	// Only enable if management is enabled AND on AC power AND battery >= threshold
 	return m.state.ConservationEnabled &&
-		   m.state.Charging &&
-		   m.state.BatteryLevel >= m.state.ChargeThreshold
+		m.state.Charging &&
+		m.state.BatteryLevel >= m.state.ChargeThreshold
 }
 
 // ShouldDisableConservation determines if conservation mode should be disabled
@@ -163,8 +163,8 @@ func (m *Manager) ShouldDisableConservation() bool {
 
 	// Only disable if management is enabled AND on AC power AND battery < threshold
 	return m.state.ConservationEnabled &&
-		   m.state.Charging &&
-		   m.state.BatteryLevel < m.state.ChargeThreshold
+		m.state.Charging &&
+		m.state.BatteryLevel < m.state.ChargeThreshold
 }
 
 // GetUptime returns the daemon uptime

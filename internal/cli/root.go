@@ -1,9 +1,9 @@
 package cli
 
 import (
-	"github.com/spf13/cobra"
 	"github.com/dom1nux/legionbatctl/internal/cli/commands"
 	"github.com/dom1nux/legionbatctl/pkg/version"
+	"github.com/spf13/cobra"
 )
 
 // Run initializes and runs the CLI application

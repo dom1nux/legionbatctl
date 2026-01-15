@@ -11,7 +11,7 @@ import (
 
 const (
 	DefaultSocketPath = "/var/run/legionbatctl.sock"
-	DefaultTimeout     = 10 * time.Second
+	DefaultTimeout    = 10 * time.Second
 )
 
 // Client represents a client for communicating with the legionbatctl daemon

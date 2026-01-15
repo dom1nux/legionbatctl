@@ -9,11 +9,11 @@ import (
 
 // CommandResult represents the result of a command execution
 type CommandResult struct {
-	Success   bool        `json:"success"`
-	Message   string      `json:"message"`
-	Data      interface{} `json:"data,omitempty"`
-	Error     string      `json:"error,omitempty"`
-	Duration  time.Duration `json:"duration"`
+	Success  bool          `json:"success"`
+	Message  string        `json:"message"`
+	Data     interface{}   `json:"data,omitempty"`
+	Error    string        `json:"error,omitempty"`
+	Duration time.Duration `json:"duration"`
 }
 
 // CommandExecutor provides high-level command execution with result formatting
@@ -212,7 +212,6 @@ func formatCharging(charging bool) string {
 	}
 	return "discharging"
 }
-
 
 // GetThresholdRange returns information about valid threshold range
 func GetThresholdRange() (min, max int, description string) {

@@ -173,15 +173,15 @@ func (d *Daemon) handleStatus(params map[string]interface{}) (interface{}, error
 	state := d.stateManager.GetState()
 	return protocol.StatusData{
 		ConservationEnabled: state.ConservationEnabled,
-		Threshold:          state.ChargeThreshold,
-		CurrentMode:        state.CurrentMode,
-		BatteryLevel:       batteryLevel,
-		ConservationMode:   conservationMode,
-		Charging:           charging,
-		LastAction:         state.LastAction,
-		LastActionTime:     state.LastActionTime,
-		DaemonUptime:       d.GetUptime().String(),
-		HardwareSupported:  true, // TODO: Implement hardware detection
+		Threshold:           state.ChargeThreshold,
+		CurrentMode:         state.CurrentMode,
+		BatteryLevel:        batteryLevel,
+		ConservationMode:    conservationMode,
+		Charging:            charging,
+		LastAction:          state.LastAction,
+		LastActionTime:      state.LastActionTime,
+		DaemonUptime:        d.GetUptime().String(),
+		HardwareSupported:   true, // TODO: Implement hardware detection
 	}, nil
 }
 

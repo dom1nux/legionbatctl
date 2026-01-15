@@ -4,10 +4,10 @@ import "time"
 
 // Message represents a communication message between CLI and daemon
 type Message struct {
-	Type     string     `json:"type"`     // "request", "response"
-	ID       string     `json:"id"`       // Unique request ID
-	Request  *Request   `json:"request,omitempty"`
-	Response *Response  `json:"response,omitempty"`
+	Type     string    `json:"type"` // "request", "response"
+	ID       string    `json:"id"`   // Unique request ID
+	Request  *Request  `json:"request,omitempty"`
+	Response *Response `json:"response,omitempty"`
 }
 
 // Request represents a command request from CLI to daemon
@@ -35,15 +35,15 @@ const (
 // StatusData represents the data returned by status command
 type StatusData struct {
 	ConservationEnabled bool      `json:"conservation_enabled"`
-	Threshold          int       `json:"threshold"`
-	CurrentMode        string    `json:"current_mode"`
-	BatteryLevel       int       `json:"battery_level"`
-	ConservationMode   bool      `json:"conservation_mode"`
-	Charging           bool      `json:"charging"`
-	LastAction         string    `json:"last_action"`
-	LastActionTime     time.Time `json:"last_action_time"`
-	DaemonUptime       string    `json:"daemon_uptime"`
-	HardwareSupported  bool      `json:"hardware_supported"`
+	Threshold           int       `json:"threshold"`
+	CurrentMode         string    `json:"current_mode"`
+	BatteryLevel        int       `json:"battery_level"`
+	ConservationMode    bool      `json:"conservation_mode"`
+	Charging            bool      `json:"charging"`
+	LastAction          string    `json:"last_action"`
+	LastActionTime      time.Time `json:"last_action_time"`
+	DaemonUptime        string    `json:"daemon_uptime"`
+	HardwareSupported   bool      `json:"hardware_supported"`
 }
 
 // EnableData represents the data returned by enable command
@@ -67,12 +67,12 @@ type SetThresholdData struct {
 
 // DaemonStatusData represents the data returned by daemon_status command
 type DaemonStatusData struct {
-	Running     bool   `json:"running"`
-	PID         int    `json:"pid"`
-	Uptime      string `json:"uptime"`
-	Version     string `json:"version"`
-	SocketPath  string `json:"socket_path"`
-	StateFile   string `json:"state_file"`
+	Running    bool   `json:"running"`
+	PID        int    `json:"pid"`
+	Uptime     string `json:"uptime"`
+	Version    string `json:"version"`
+	SocketPath string `json:"socket_path"`
+	StateFile  string `json:"state_file"`
 }
 
 // IsValidCommand checks if a command string is valid
@@ -97,11 +97,11 @@ func ValidateThreshold(threshold int) error {
 
 // Common errors
 var (
-	ErrInvalidThreshold = NewError("threshold must be between 60 and 100")
-	ErrDaemonNotRunning = NewError("daemon not running")
+	ErrInvalidThreshold     = NewError("threshold must be between 60 and 100")
+	ErrDaemonNotRunning     = NewError("daemon not running")
 	ErrHardwareNotSupported = NewError("hardware not supported")
-	ErrPermissionDenied = NewError("permission denied")
-	ErrInvalidCommand = NewError("invalid command")
+	ErrPermissionDenied     = NewError("permission denied")
+	ErrInvalidCommand       = NewError("invalid command")
 )
 
 // Error represents a protocol error

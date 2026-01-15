@@ -193,15 +193,15 @@ func TestCommandExecutorExecuteSetThreshold(t *testing.T) {
 func TestValidateThreshold(t *testing.T) {
 	tests := []struct {
 		threshold int
-		expectErr  bool
+		expectErr bool
 	}{
-		{60, false},   // Minimum valid
-		{80, false},   // Valid
-		{100, false},  // Maximum valid
-		{59, true},    // Below minimum
-		{101, true},   // Above maximum
-		{0, true},     // Invalid
-		{-10, true},   // Invalid
+		{60, false},  // Minimum valid
+		{80, false},  // Valid
+		{100, false}, // Maximum valid
+		{59, true},   // Below minimum
+		{101, true},  // Above maximum
+		{0, true},    // Invalid
+		{-10, true},  // Invalid
 	}
 
 	for _, tt := range tests {
@@ -237,14 +237,14 @@ func TestGetThresholdRange(t *testing.T) {
 func TestFormatStatus(t *testing.T) {
 	status := &protocol.StatusData{
 		ConservationEnabled: true,
-		Threshold:          80,
-		CurrentMode:        "enabled",
-		BatteryLevel:       75,
-		ConservationMode:   false,
-		Charging:           true,
-		LastAction:         "enable",
-		DaemonUptime:       "1h25m30s",
-		HardwareSupported:  true,
+		Threshold:           80,
+		CurrentMode:         "enabled",
+		BatteryLevel:        75,
+		ConservationMode:    false,
+		Charging:            true,
+		LastAction:          "enable",
+		DaemonUptime:        "1h25m30s",
+		HardwareSupported:   true,
 	}
 
 	formatted := FormatStatus(status)
@@ -345,7 +345,7 @@ func TestRetryOperation(t *testing.T) {
 // Helper function to check if string contains substring
 func contains(s, substr string) bool {
 	return len(s) >= len(substr) && s[len(s)-len(substr):] == substr ||
-		   (len(s) > len(substr) && findSubstring(s, substr))
+		(len(s) > len(substr) && findSubstring(s, substr))
 }
 
 func findSubstring(s, substr string) bool {
