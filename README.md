@@ -93,36 +93,36 @@ legionbatctl implements a sophisticated single-binary architecture that operates
 
 - Lenovo Legion laptop with conservation mode support
 - Linux operating system
-- Go 1.22+ (for building from source) - can be installed via mise
-- Root/sudo privileges
+- [mise](https://mise.jdx.dev) — a single binary that provisions Go and runs every build/install task
+- Root/sudo privileges (only for the `install` / `uninstall` / `restart` tasks)
 - systemd (for daemon mode)
 
-### Quick Installation with Makefile
+### Quick Installation with mise
 
-The project includes a simplified Makefile that works with mise-based Go installations:
+The project ships a `mise.toml` that pins the Go toolchain and orchestrates every build, install, and service-management task. With [mise](https://mise.jdx.dev) installed, the entire workflow is `mise run …`:
 
 ```bash
 # Clone the repository
 git clone https://github.com/dom1nux/legionbatctl.git
 cd legionbatctl
 
-# Build binary (uses mise for Go)
-make build
+# Build binary (as your user; mise provisions Go automatically)
+mise run build
 
 # Install and start daemon (requires root)
-sudo make install
+sudo mise run install
 
 # Check status
-make status
+mise run status
 ```
 
-The Makefile separates build and installation phases:
-- **Build**: Done as regular user using your mise Go installation
+`mise.toml` separates build and installation phases:
+- **Build**: Done as regular user; mise pins Go to the version declared in `[tools]`
 - **Install**: Done as root without requiring Go to be installed system-wide
 
 ### Manual Installation
 
-If you prefer manual installation:
+If you prefer manual installation (requires Go 1.25+ on your `PATH`; `mise` will pin it for you automatically inside this repo):
 
 ```bash
 git clone https://github.com/dom1nux/legionbatctl.git
@@ -226,36 +226,54 @@ Comprehensive error handling throughout the system:
 - **Hardware interaction**: Validation and graceful degradation
 - **Daemon lifecycle**: Proper cleanup and resource management
 
-## Makefile Commands
+## mise Tasks
 
-The simplified Makefile provides all essential operations:
+All build, install, and service-management tasks are defined in `mise.toml` and invoked through `mise run`. Run `mise tasks` (or `mise tasks --all`) to see the full list at any time.
 
 ```bash
-# Build binary (as user, with mise)
-make build
+# Build binary (as user, with mise-pinned Go)
+mise run build
 
-# Install and start service (as root)
-sudo make install
+# Run the test suite
+mise run test
+
+# Install binary and start service (as root)
+sudo mise run install
 
 # Check service and CLI status
-make status
+mise run status
 
 # View live daemon logs
-make logs
+mise run logs
 
 # Restart daemon
-sudo make restart
+sudo mise run restart
 
 # Uninstall completely
-sudo make uninstall
+sudo mise run uninstall
 
 # Clean build artifacts
-make clean
+mise run clean
 
-# Local testing
-make dev          # Build and test CLI locally
-make help         # Show all available commands
+# Local development: build and run 'legionbatctl status' on the local binary
+mise run dev
 ```
+
+### Task reference
+
+| Task | Purpose | Requires root? |
+|---|---|---|
+| `build` | Build `build/legionbatctl` with version ldflags | no |
+| `test` | Run `go test ./...` | no |
+| `vet` | Run `go vet ./...` | no |
+| `fmt` | Format Go sources with `gofmt` | no |
+| `clean` | Remove `build/` and run `go clean` | no |
+| `dev` | Build, then run `build/legionbatctl status` | no |
+| `status` | Show `systemctl status` and CLI status | no |
+| `logs` | Tail the daemon's `journalctl` | no |
+| `install` | Install binary + systemd unit, enable & start service | **yes** |
+| `uninstall` | Stop, disable, and remove daemon artifacts | **yes** |
+| `restart` | Restart the daemon | **yes** |
 
 ## Configuration
 

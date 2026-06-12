@@ -1,0 +1,125 @@
+# mise.toml — replaces Makefile for legionbatctl
+# https://mise.jdx.dev
+
+[env]
+# Static binary — no CGO dependencies; keeps the systemd unit self-contained.
+CGO_ENABLED = "0"
+
+[tools]
+# Pinned to match go.mod (go 1.25.0); mise will provision this toolchain
+# automatically when the user enters the repo (or runs `mise install`).
+go = "1.25.0"
+
+# ---- build ----
+[tasks.build]
+description = "Build the legionbatctl binary into build/"
+run = """
+VERSION=$(git describe --tags --always --dirty 2>/dev/null || echo dev)
+BUILD_DATE=$(date -u +%Y-%m-%dT%H:%M:%S)
+echo "Building legionbatctl $VERSION..."
+mkdir -p build
+go build \
+  -ldflags "-X main.version=$VERSION -X main.buildDate=$BUILD_DATE -s -w" \
+  -o build/legionbatctl \
+  ./cmd/legionbatctl
+"""
+sources = ["cmd/**/*.go", "internal/**/*.go", "pkg/**/*.go", "go.mod", "go.sum", "**/*.service"]
+outputs = ["build/legionbatctl"]
+
+# ---- test / vet / fmt ----
+[tasks.test]
+description = "Run go test ./..."
+run = "go test ./..."
+
+[tasks.vet]
+description = "Run go vet ./..."
+run = "go vet ./..."
+
+[tasks.fmt]
+description = "Format Go sources with gofmt"
+run = "gofmt -w ."
+
+# ---- install (root) ----
+[tasks.install]
+description = "Install binary + systemd unit, enable & start the service (requires root)"
+run = """
+set -e
+if [ ! -f build/legionbatctl ]; then
+  echo "Binary missing: run 'mise run build' first." >&2
+  exit 1
+fi
+echo "Installing legionbatctl..."
+install -Dm755 build/legionbatctl /usr/bin/legionbatctl
+install -Dm644 systemd/legionbatctl.service /etc/systemd/system/legionbatctl.service
+systemctl daemon-reload
+systemctl enable --now legionbatctl.service
+echo "Installation complete. Daemon started and enabled."
+"""
+
+# ---- uninstall (root) ----
+[tasks.uninstall]
+description = "Stop, disable, and remove daemon artifacts (requires root)"
+run = """
+set -e
+echo "Uninstalling legionbatctl..."
+systemctl stop legionbatctl.service 2>/dev/null || true
+systemctl disable legionbatctl.service 2>/dev/null || true
+rm -f /usr/bin/legionbatctl
+rm -f /etc/systemd/system/legionbatctl.service
+rm -f /var/run/legionbatctl.sock
+rm -f /var/run/legionbatctl.pid
+rm -f /etc/legionbatctl.state
+rm -f /etc/legionbatctl.state.backup
+rm -f /etc/legionbatctl.state.tmp
+systemctl daemon-reload
+echo "Uninstallation complete."
+"""
+
+# ---- clean ----
+[tasks.clean]
+description = "Remove build/ and run go clean"
+run = """
+echo "Cleaning build artifacts..."
+rm -rf build
+go clean
+"""
+
+# ---- service management ----
+[tasks.status]
+description = "Show systemd status and CLI status"
+run = """
+echo "=== legionbatctl Service Status ==="
+systemctl status legionbatctl.service || true
+echo
+echo "=== CLI Status ==="
+if command -v legionbatctl >/dev/null 2>&1; then
+  legionbatctl status
+else
+  echo "Binary not found. Use 'sudo mise run install' first."
+fi
+"""
+
+[tasks.restart]
+description = "Restart the daemon (requires root)"
+run = """
+echo "Restarting legionbatctl daemon..."
+systemctl restart legionbatctl.service
+echo "Use 'mise run status' to check if it restarted successfully."
+"""
+
+[tasks.logs]
+description = "Tail the daemon's journal"
+run = "journalctl -u legionbatctl.service -f"
+
+# ---- dev ----
+[tasks.dev]
+description = "Build and run 'legionbatctl status' locally"
+depends = ["build"]
+run = """
+echo "Testing CLI locally..."
+if [ -f build/legionbatctl ]; then
+  build/legionbatctl status
+else
+  echo "Binary not found. Run 'mise run build' first."
+fi
+"""

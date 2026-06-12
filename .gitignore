@@ -48,3 +48,7 @@ coverage.out
 
 # Configuration files (optional - uncomment if you don't want to track example configs)
 # docs/legionbatctl.conf
+
+# mise local config (per-machine overrides)
+.mise/
+mise.toml.local

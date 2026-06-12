@@ -2,12 +2,14 @@
 
 ## Build and Test Commands
 
+All build, install, and service-management tasks are orchestrated by [mise](https://mise.jdx.dev) via `mise.toml`. The Go toolchain is pinned in `[tools] go = "1.25.0"`, so entering the repo (or running `mise install`) provisions the right Go version automatically.
+
 ### Building
 ```bash
-# Build the binary (standard)
-make build
+# Build the binary (uses mise-pinned Go and source-caching)
+mise run build
 
-# Manual build
+# Manual build (bypasses mise; requires Go 1.25+ on PATH)
 go build -o build/legionbatctl ./cmd/legionbatctl
 
 # Build with version info
@@ -16,7 +18,10 @@ go build -ldflags "-X main.version=$(VERSION)" ./cmd/legionbatctl
 
 ### Testing
 ```bash
-# Run all tests
+# Run all tests via mise
+mise run test
+
+# Or directly:
 go test ./...
 
 # Run tests for a specific package
@@ -36,17 +41,30 @@ go test ./internal/state -v -run TestStateManager/.*
 ### Other Commands
 ```bash
 # Clean build artifacts
-make clean
+mise run clean
 
 # Install and start service (requires root)
-sudo make install
+sudo mise run install
+
+# Uninstall service and binaries (requires root)
+sudo mise run uninstall
+
+# Restart daemon (requires root)
+sudo mise run restart
 
 # Check service status
-make status
+mise run status
 
 # View daemon logs
-make logs
+mise run logs
+
+# Build and run the CLI locally for quick testing
+mise run dev
+
+# List every available task with descriptions
+mise tasks
 ```
+
 
 ## Code Style Guidelines
 
