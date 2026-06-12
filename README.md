@@ -94,7 +94,7 @@ legionbatctl implements a sophisticated single-binary architecture that operates
 - Lenovo Legion laptop with conservation mode support
 - Linux operating system
 - [mise](https://mise.jdx.dev) — a single binary that provisions Go and runs every build/install task
-- Root/sudo privileges (only for the `install` / `uninstall` / `restart` tasks)
+- sudo access (the `install` / `uninstall` / `restart` tasks prompt for your password)
 - systemd (for daemon mode)
 
 ### Quick Installation with mise
@@ -109,8 +109,8 @@ cd legionbatctl
 # Build binary (as your user; mise provisions Go automatically)
 mise run build
 
-# Install and start daemon (requires root)
-sudo mise run install
+# Install and start daemon (prompts for sudo password)
+mise run install
 
 # Check status
 mise run status
@@ -118,7 +118,7 @@ mise run status
 
 `mise.toml` separates build and installation phases:
 - **Build**: Done as regular user; mise pins Go to the version declared in `[tools]`
-- **Install**: Done as root without requiring Go to be installed system-wide
+- **Install**: The task body itself prompts for your password via `sudo -v` and runs the privileged commands in a single `sudo sh -c` invocation. No `sudo` prefix is needed.
 
 ### Manual Installation
 
@@ -237,8 +237,8 @@ mise run build
 # Run the test suite
 mise run test
 
-# Install binary and start service (as root)
-sudo mise run install
+# Install binary and start service (prompts for sudo password)
+mise run install
 
 # Check service and CLI status
 mise run status
@@ -246,11 +246,11 @@ mise run status
 # View live daemon logs
 mise run logs
 
-# Restart daemon
-sudo mise run restart
+# Restart daemon (prompts for sudo password)
+mise run restart
 
-# Uninstall completely
-sudo mise run uninstall
+# Uninstall completely (prompts for sudo password)
+mise run uninstall
 
 # Clean build artifacts
 mise run clean
@@ -261,7 +261,7 @@ mise run dev
 
 ### Task reference
 
-| Task | Purpose | Requires root? |
+| Task | Purpose | Privileges |
 |---|---|---|
 | `build` | Build `build/legionbatctl` with version ldflags | no |
 | `test` | Run `go test ./...` | no |
@@ -271,9 +271,9 @@ mise run dev
 | `dev` | Build, then run `build/legionbatctl status` | no |
 | `status` | Show `systemctl status` and CLI status | no |
 | `logs` | Tail the daemon's `journalctl` | no |
-| `install` | Install binary + systemd unit, enable & start service | **yes** |
-| `uninstall` | Stop, disable, and remove daemon artifacts | **yes** |
-| `restart` | Restart the daemon | **yes** |
+| `install` | Install binary + systemd unit, enable & start service | prompts for password |
+| `uninstall` | Stop, disable, and remove daemon artifacts | prompts for password |
+| `restart` | Restart the daemon | prompts for password |
 
 ## Configuration
 

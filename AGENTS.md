@@ -14,9 +14,9 @@ All tasks live in `mise.toml` (Go 1.25.0 is pinned in `[tools]`).
 | `mise run dev` | Build, then run `build/legionbatctl status` | no |
 | `mise run status` | `systemctl status` + CLI status | no |
 | `mise run logs` | `journalctl -u legionbatctl.service -f` | no |
-| `mise run install` | Install binary + systemd unit, enable & start | **yes** |
-| `mise run uninstall` | Stop, disable, remove artifacts | **yes** |
-| `mise run restart` | Restart the daemon | **yes** |
+| `mise run install` | Install binary + systemd unit, enable & start | prompts for password |
+| `mise run uninstall` | Stop, disable, remove artifacts | prompts for password |
+| `mise run restart` | Restart the daemon | prompts for password |
 
 Manual build (requires Go 1.25+ on PATH): `go build -o build/legionbatctl ./cmd/legionbatctl`.
 Single test: `go test ./internal/state -v -run TestNewManager`.
