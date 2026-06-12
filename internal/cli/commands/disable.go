@@ -3,8 +3,8 @@ package commands
 import (
 	"fmt"
 
-	"github.com/spf13/cobra"
 	"github.com/dom1nux/legionbatctl/internal/client"
+	"github.com/spf13/cobra"
 )
 
 // NewDisableCommand creates the disable command
@@ -36,7 +36,7 @@ func runDisable(cmd *cobra.Command, args []string) error {
 	fmt.Print(output)
 
 	if !result.Success {
-		return fmt.Errorf(result.Error)
+		return fmt.Errorf("disable command failed: %s", result.Error)
 	}
 
 	return nil

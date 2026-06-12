@@ -88,6 +88,10 @@ func DaemonStatus(socketPath string) (*DaemonStatusInfo, error) {
 	}
 
 	if !response.Success {
+		// IMPORTANT: keep this as `fmt.Errorf("…: %s", response.Error)`.
+		// Passing `response.Error` directly as the format string would let
+		// a `%` inside the daemon-supplied message be interpreted as a verb.
+		// See also the matching fix in internal/cli/commands/*.go.
 		return nil, fmt.Errorf("daemon returned error: %s", response.Error)
 	}
 

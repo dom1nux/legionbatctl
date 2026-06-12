@@ -3,8 +3,8 @@ package commands
 import (
 	"fmt"
 
-	"github.com/spf13/cobra"
 	"github.com/dom1nux/legionbatctl/internal/client"
+	"github.com/spf13/cobra"
 )
 
 // NewEnableCommand creates the enable command
@@ -36,7 +36,7 @@ func runEnable(cmd *cobra.Command, args []string) error {
 	fmt.Print(output)
 
 	if !result.Success {
-		return fmt.Errorf(result.Error)
+		return fmt.Errorf("enable command failed: %s", result.Error)
 	}
 
 	return nil
