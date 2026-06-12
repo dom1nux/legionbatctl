@@ -71,3 +71,13 @@ git -c user.name="$(git config --get user.name || git config --get --global user
 ```
 
 If a commit was made with a wrong author, alert the user **before** rewriting history (`git rebase --exec 'git commit --amend --no-edit --author="<correct>"'`) and force-pushing — both are destructive and require explicit consent.
+
+## Git Commit Messages
+
+Keep them brief and concise.
+
+- **Subject**: 50-72 chars, imperative mood, no trailing period. Use Conventional Commits prefixes (`feat:`, `fix:`, `chore:`, `docs:`, `refactor:`, `test:`).
+- **Body**: 1-4 short lines, separated by a blank line. Explain the *why*, not the *what* — the diff already shows the *what*.
+- **Anti-patterns**: multi-paragraph essays, "previously X, now Y" treatises, bodies that just restate the subject in different words.
+
+The diff shows *what* changed. The message should answer *why*.
