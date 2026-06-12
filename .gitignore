@@ -53,5 +53,5 @@ coverage.out
 .mise/
 mise.toml.local
 
-# pi (coding-agent) scratch space — plans, session notes, etc.
-.pi/
+# pi (coding-agent) plans — session-scoped markdown plans, not project source.
+.pi/plans/
