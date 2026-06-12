@@ -270,3 +270,31 @@ func (m *Manager) saveStateAtomic() error {
 	return os.Rename(tmpPath, m.statePath)
 }
 ```
+
+## Git Identity
+
+When creating commits on behalf of the user, **always** use the user's git identity — never invent a placeholder. The required reading order is:
+
+1. **Per-repo first** (most specific): `git config user.name` and `git config user.email` run inside the repo (no `--global`). If both are set, use them as-is.
+2. **Global fallback**: `git config --global user.name` and `git config --global user.email`. If both are set, use them.
+3. **No identity at all?** Do **not** invent one and do **not** commit. Stop and ask the user to run `git config --global user.{name,email} "…"` before proceeding.
+
+### Commit invocation
+
+Use `-c` flags on every `git commit` so you don't write to the user's git config:
+
+```bash
+# Correct
+git -c user.name="$(git config --get user.name || git config --get --global user.name)" \
+    -c user.email="$(git config --get user.email || git config --get --global user.email)" \
+    commit -m "…"
+
+# WRONG — leaves a placeholder in history that the user will have to rewrite
+git -c user.name="agent" -c user.email="agent@local" commit -m "…"
+```
+
+If you discover post-hoc (i.e. commits already exist with a placeholder author), alert the user **before** rewriting history with `git rebase --exec '… --reset-author'` and force-pushing — both are destructive and require explicit confirmation.
+
+### Why this matters
+
+Commits authored by an assistant (e.g. `pi <pi@local>`) instead of the user pollute the project's contributor graph, confuse `git log --author`, and force the user to rewrite history or open the project under a different identity. Catching this at commit time is far cheaper than rewriting after the fact.
