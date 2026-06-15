@@ -122,7 +122,7 @@ mise run status
 
 ### Manual Installation
 
-If you prefer manual installation (requires Go 1.25+ on your `PATH`; `mise` will pin it for you automatically inside this repo):
+If you prefer manual installation (requires Go 1.26+ on your `PATH`; `mise` will pin it for you automatically inside this repo):
 
 ```bash
 git clone https://github.com/dom1nux/legionbatctl.git

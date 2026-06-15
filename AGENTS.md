@@ -2,7 +2,7 @@
 
 ## Build, Test, and Service Tasks
 
-All tasks live in `mise.toml` (Go 1.25.0 is pinned in `[tools]`).
+All tasks live in `mise.toml` (Go 1.26.4 is pinned in `[tools]`).
 
 | Task | Purpose | Root? |
 |---|---|---|
@@ -18,7 +18,7 @@ All tasks live in `mise.toml` (Go 1.25.0 is pinned in `[tools]`).
 | `mise run uninstall` | Stop, disable, remove artifacts | prompts for password |
 | `mise run restart` | Restart the daemon | prompts for password |
 
-Manual build (requires Go 1.25+ on PATH): `go build -o build/legionbatctl ./cmd/legionbatctl`.
+Manual build (requires Go 1.26+ on PATH): `go build -o build/legionbatctl ./cmd/legionbatctl`.
 Single test: `go test ./internal/state -v -run TestNewManager`.
 
 ## Project Structure
