@@ -6,9 +6,9 @@
 CGO_ENABLED = "0"
 
 [tools]
-# Pinned to match go.mod (go 1.25.0); mise will provision this toolchain
+# Pinned to match go.mod (go 1.26.4); mise will provision this toolchain
 # automatically when the user enters the repo (or runs `mise install`).
-go = "1.25.0"
+go = "1.26.4"
 
 # ---- build ----
 [tasks.build]
