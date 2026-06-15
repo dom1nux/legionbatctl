@@ -302,7 +302,8 @@ func TestCheckDaemonConnection(t *testing.T) {
 	}
 
 	// Start daemon
-	daemonInstance := daemon.NewDaemon(socketPath, "")
+	statePath := filepath.Join(tempDir, "test.state")
+	daemonInstance := daemon.NewDaemon(socketPath, statePath)
 	if err := daemonInstance.Start(); err != nil {
 		t.Fatalf("Failed to start daemon: %v", err)
 	}
