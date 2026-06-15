@@ -78,7 +78,7 @@ func (d *Daemon) processRequest(req *protocol.Message) *protocol.Message {
 		return protocol.NewErrorResponse(req.ID, fmt.Errorf("missing request data"))
 	}
 
-	var response interface{}
+	var response any
 	var err error
 
 	switch request.Command {
@@ -104,7 +104,7 @@ func (d *Daemon) processRequest(req *protocol.Message) *protocol.Message {
 }
 
 // handleEnable handles the enable command
-func (d *Daemon) handleEnable(params map[string]interface{}) (interface{}, error) {
+func (d *Daemon) handleEnable(params map[string]any) (any, error) {
 	if d.stateManager == nil {
 		return nil, fmt.Errorf("state manager not initialized")
 	}
@@ -130,7 +130,7 @@ func (d *Daemon) handleEnable(params map[string]interface{}) (interface{}, error
 }
 
 // handleDisable handles the disable command
-func (d *Daemon) handleDisable(params map[string]interface{}) (interface{}, error) {
+func (d *Daemon) handleDisable(params map[string]any) (any, error) {
 	if d.stateManager == nil {
 		return nil, fmt.Errorf("state manager not initialized")
 	}
@@ -153,7 +153,7 @@ func (d *Daemon) handleDisable(params map[string]interface{}) (interface{}, erro
 }
 
 // handleStatus handles the status command
-func (d *Daemon) handleStatus(params map[string]interface{}) (interface{}, error) {
+func (d *Daemon) handleStatus(params map[string]any) (any, error) {
 	if d.stateManager == nil {
 		return nil, fmt.Errorf("state manager not initialized")
 	}
@@ -186,7 +186,7 @@ func (d *Daemon) handleStatus(params map[string]interface{}) (interface{}, error
 }
 
 // handleSetThreshold handles the set_threshold command
-func (d *Daemon) handleSetThreshold(params map[string]interface{}) (interface{}, error) {
+func (d *Daemon) handleSetThreshold(params map[string]any) (any, error) {
 	if d.stateManager == nil {
 		return nil, fmt.Errorf("state manager not initialized")
 	}
@@ -221,7 +221,7 @@ func (d *Daemon) handleSetThreshold(params map[string]interface{}) (interface{},
 }
 
 // handleDaemonStatus handles the daemon_status command
-func (d *Daemon) handleDaemonStatus(params map[string]interface{}) (interface{}, error) {
+func (d *Daemon) handleDaemonStatus(params map[string]any) (any, error) {
 	return protocol.DaemonStatusData{
 		Running:    d.IsRunning(),
 		PID:        d.GetPID(),

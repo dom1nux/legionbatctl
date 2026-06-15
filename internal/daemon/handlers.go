@@ -95,7 +95,7 @@ func DaemonStatus(socketPath string) (*DaemonStatusInfo, error) {
 		return nil, fmt.Errorf("daemon returned error: %s", response.Error)
 	}
 
-	data, ok := response.Data.(map[string]interface{})
+	data, ok := response.Data.(map[string]any)
 	if !ok {
 		return nil, fmt.Errorf("invalid response data format")
 	}
@@ -184,7 +184,7 @@ func (c *DaemonClient) connect() (net.Conn, error) {
 }
 
 // SendRequest sends a request to the daemon
-func (c *DaemonClient) SendRequest(command string, params map[string]interface{}) (*protocol.Response, error) {
+func (c *DaemonClient) SendRequest(command string, params map[string]any) (*protocol.Response, error) {
 	conn, err := c.connect()
 	if err != nil {
 		return nil, err

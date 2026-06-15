@@ -18,7 +18,7 @@ func TestMessageValidation(t *testing.T) {
 				ID:   "test-123",
 				Request: &Request{
 					Command: "enable",
-					Params:  map[string]interface{}{},
+					Params:  map[string]any{},
 				},
 			},
 			wantErr: false,
@@ -94,7 +94,7 @@ func TestMessageValidation(t *testing.T) {
 }
 
 func TestNewRequest(t *testing.T) {
-	params := map[string]interface{}{
+	params := map[string]any{
 		"threshold": 80,
 	}
 
@@ -122,7 +122,7 @@ func TestNewRequest(t *testing.T) {
 }
 
 func TestNewResponse(t *testing.T) {
-	data := map[string]interface{}{
+	data := map[string]any{
 		"result": "success",
 	}
 

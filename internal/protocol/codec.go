@@ -44,7 +44,7 @@ func (c *Codec) Decode() (*Message, error) {
 }
 
 // SendRequest encodes and sends a request message
-func (c *Codec) SendRequest(command string, params map[string]interface{}) (*Message, error) {
+func (c *Codec) SendRequest(command string, params map[string]any) (*Message, error) {
 	msg := NewRequest(command, params)
 	if err := c.Encode(msg); err != nil {
 		return nil, fmt.Errorf("send request failed: %w", err)
@@ -53,7 +53,7 @@ func (c *Codec) SendRequest(command string, params map[string]interface{}) (*Mes
 }
 
 // SendResponse encodes and sends a response message
-func (c *Codec) SendResponse(requestID string, success bool, data interface{}, errMsg string) error {
+func (c *Codec) SendResponse(requestID string, success bool, data any, errMsg string) error {
 	msg := NewResponse(requestID, success, data, errMsg)
 	return c.Encode(msg)
 }
@@ -65,7 +65,7 @@ func (c *Codec) SendErrorResponse(requestID string, err error) error {
 }
 
 // SendSuccessResponse encodes and sends a success response
-func (c *Codec) SendSuccessResponse(requestID string, data interface{}) error {
+func (c *Codec) SendSuccessResponse(requestID string, data any) error {
 	msg := NewSuccessResponse(requestID, data)
 	return c.Encode(msg)
 }

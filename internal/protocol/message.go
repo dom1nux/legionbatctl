@@ -7,7 +7,7 @@ import (
 )
 
 // NewRequest creates a new request message
-func NewRequest(command string, params map[string]interface{}) *Message {
+func NewRequest(command string, params map[string]any) *Message {
 	return &Message{
 		Type: "request",
 		ID:   generateID(),
@@ -19,7 +19,7 @@ func NewRequest(command string, params map[string]interface{}) *Message {
 }
 
 // NewResponse creates a new response message
-func NewResponse(requestID string, success bool, data interface{}, errMsg string) *Message {
+func NewResponse(requestID string, success bool, data any, errMsg string) *Message {
 	response := &Response{
 		Success: success,
 		Data:    data,
@@ -47,7 +47,7 @@ func NewErrorResponse(requestID string, err error) *Message {
 }
 
 // NewSuccessResponse creates a new success response message
-func NewSuccessResponse(requestID string, data interface{}) *Message {
+func NewSuccessResponse(requestID string, data any) *Message {
 	return NewResponse(requestID, true, data, "")
 }
 

@@ -75,7 +75,7 @@ func (c *Client) IsDaemonRunning() bool {
 }
 
 // SendRequest sends a request to the daemon and returns the response
-func (c *Client) SendRequest(command string, params map[string]interface{}) (*protocol.Response, error) {
+func (c *Client) SendRequest(command string, params map[string]any) (*protocol.Response, error) {
 	conn, err := c.connect()
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to daemon: %w", err)
@@ -154,7 +154,7 @@ func (c *Client) Disable() error {
 
 // SetThreshold sets the charge threshold
 func (c *Client) SetThreshold(threshold int) error {
-	params := map[string]interface{}{
+	params := map[string]any{
 		"threshold": threshold,
 	}
 
@@ -182,7 +182,7 @@ func (c *Client) GetStatus() (*protocol.StatusData, error) {
 	}
 
 	// Parse response data
-	data, ok := response.Data.(map[string]interface{})
+	data, ok := response.Data.(map[string]any)
 	if !ok {
 		return nil, fmt.Errorf("invalid response data format")
 	}
@@ -240,7 +240,7 @@ func (c *Client) GetDaemonStatus() (*protocol.DaemonStatusData, error) {
 	}
 
 	// Parse response data
-	data, ok := response.Data.(map[string]interface{})
+	data, ok := response.Data.(map[string]any)
 	if !ok {
 		return nil, fmt.Errorf("invalid response data format")
 	}

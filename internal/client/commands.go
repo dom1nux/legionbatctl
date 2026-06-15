@@ -11,7 +11,7 @@ import (
 type CommandResult struct {
 	Success  bool          `json:"success"`
 	Message  string        `json:"message"`
-	Data     interface{}   `json:"data,omitempty"`
+	Data     any           `json:"data,omitempty"`
 	Error    string        `json:"error,omitempty"`
 	Duration time.Duration `json:"duration"`
 }
@@ -37,7 +37,7 @@ func newSuccessResult(message string, duration time.Duration) *CommandResult {
 	}
 }
 
-func newSuccessResultWithData(message string, data interface{}, duration time.Duration) *CommandResult {
+func newSuccessResultWithData(message string, data any, duration time.Duration) *CommandResult {
 	return &CommandResult{
 		Success:  true,
 		Message:  message,
@@ -93,7 +93,7 @@ func (e *CommandExecutor) ExecuteSetThreshold(threshold int) *CommandResult {
 
 	return newSuccessResultWithData(
 		fmt.Sprintf("Charge threshold set to %d%%", threshold),
-		map[string]interface{}{"threshold": threshold},
+		map[string]any{"threshold": threshold},
 		duration,
 	)
 }
@@ -186,7 +186,7 @@ func FormatStatusResult(result *CommandResult) string {
 // FormatSetThresholdResult formats the result of a set_threshold command
 func FormatSetThresholdResult(result *CommandResult) string {
 	if result.Success {
-		if data, ok := result.Data.(map[string]interface{}); ok {
+		if data, ok := result.Data.(map[string]any); ok {
 			if threshold, ok := data["threshold"].(int); ok {
 				return fmt.Sprintf("✓ Charge threshold set to %d%%. Conservation mode will activate at this level.", threshold)
 			}
@@ -235,7 +235,7 @@ func CheckDaemonConnection(client *Client) error {
 func RetryOperation(operation func() error, maxRetries int, delay time.Duration) error {
 	var lastErr error
 
-	for i := 0; i < maxRetries; i++ {
+	for i := range maxRetries {
 		if i > 0 {
 			time.Sleep(delay)
 		}

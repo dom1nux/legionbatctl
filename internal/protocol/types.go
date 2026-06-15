@@ -12,15 +12,15 @@ type Message struct {
 
 // Request represents a command request from CLI to daemon
 type Request struct {
-	Command string                 `json:"command"` // "enable", "disable", "status", "set_threshold", "daemon_status"
-	Params  map[string]interface{} `json:"params"`
+	Command string         `json:"command"` // "enable", "disable", "status", "set_threshold", "daemon_status"
+	Params  map[string]any `json:"params"`
 }
 
 // Response represents a response from daemon to CLI
 type Response struct {
-	Success bool        `json:"success"`
-	Data    interface{} `json:"data,omitempty"`
-	Error   string      `json:"error,omitempty"`
+	Success bool   `json:"success"`
+	Data    any    `json:"data,omitempty"`
+	Error   string `json:"error,omitempty"`
 }
 
 // Command constants

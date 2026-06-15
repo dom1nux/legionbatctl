@@ -193,7 +193,7 @@ func (d *Daemon) writePIDFile() error {
 	}
 
 	// Write PID file
-	if err := os.WriteFile(d.pidPath, []byte(fmt.Sprintf("%d\n", pid)), 0644); err != nil {
+	if err := os.WriteFile(d.pidPath, fmt.Appendf(nil, "%d\n", pid), 0644); err != nil {
 		return fmt.Errorf("failed to write PID file: %w", err)
 	}
 
